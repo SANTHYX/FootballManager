@@ -1,0 +1,42 @@
+﻿@model FootballManagerApp.Models.Match
+
+@{
+    ViewData["Title"] = "Details";
+}
+
+<h1>Details</h1>
+
+<div>
+    <h4>Match</h4>
+    <hr />
+    <dl class="row">
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.Versus)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Versus)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.MachType)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.MachType)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.DateOfMatch)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.DateOfMatch)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.Team)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Team.Id)
+        </dd>
+    </dl>
+</div>
+<div>
+    <button type="button" class="btn btn-primary"><a asp-action="Edit" asp-route-id="@Model.Id">Edit</a></button>
+    <button type="button" class="btn btn-warning"><a asp-action="Index">Back to List</a></button>
+</div>

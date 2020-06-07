@@ -1,0 +1,53 @@
+﻿@model IEnumerable<FootballManagerApp.Models.Match>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Matches</h1>
+
+<p>
+    <button type="button" class="btn btn-primary"><a asp-action="Create">Create New</a></button>
+</p>
+<table class="table table-info">
+    <thead>
+        <tr>
+            <th scope="row">
+                <center>@Html.DisplayNameFor(model => model.Versus)</center>
+            </th>
+            <th scope="row">
+                <center>@Html.DisplayNameFor(model => model.MachType)</center>
+            </th>
+            <th scope="row">
+                <center>@Html.DisplayNameFor(model => model.DateOfMatch)</center>
+            </th>
+            <th scope="row">
+                <center>@Html.DisplayNameFor(model => model.Team)</center>
+            </th>
+            <td></td>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                <center>@Html.DisplayFor(modelItem => item.Versus)</center>
+            </td>
+            <td>
+                <center>@Html.DisplayFor(modelItem => item.MachType)</center>
+            </td>
+            <td>
+                <center>@Html.DisplayFor(modelItem => item.DateOfMatch)</center>
+            </td>
+            <td>
+                <center>@Html.DisplayFor(modelItem => item.Team.Id)</center>
+            </td>
+            <td>
+                <button class="btn btn-primary"><a asp-action="Edit" asp-route-id="@item.Id">Edit</a></button>
+                <button class="btn btn-info"><a asp-action="Details" asp-route-id="@item.Id">Details</a> </button>
+                <button class="btn btn-warning"><a asp-action="Delete" asp-route-id="@item.Id">Delete</a></button>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

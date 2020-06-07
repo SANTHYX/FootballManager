@@ -1,0 +1,36 @@
+﻿@model FootballManagerApp.Models.Trainer
+
+@{
+    ViewData["Title"] = "Details";
+}
+
+<h1>Details</h1>
+
+<div>
+    <h4>Trainer</h4>
+    <hr />
+    <dl class="row">
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.Name)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Name)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.Surname)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Surname)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.TrainerOf)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.TrainerOf)
+        </dd>
+    </dl>
+</div>
+<div>
+    <button type="button" class="btn btn-primary"><a asp-action="Edit" asp-route-id="@Model.Id">Edit</a></button>
+    <button type="button" class="btn btn-warning"><a asp-action="Index">Back to List</a></button>
+</div>
