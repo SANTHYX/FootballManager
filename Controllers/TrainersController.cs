@@ -7,22 +7,23 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using FootballManagerApp.EntityFramework;
 using FootballManagerApp.Models;
+using FootballManagerApp.Repositories.Interfaces;
 
 namespace FootballManagerApp.Controllers
 {
     public class TrainersController : Controller
     {
-        private readonly FootballDbContext _context;
+        private readonly ITrainerRepository repository;
 
-        public TrainersController(FootballDbContext context)
+        public TrainersController(ITrainerRepository _repository)
         {
-            _context = context;
+            repository = _repository;
         }
 
         // GET: Trainers
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Trainer.ToListAsync());
+            return View(await repository.GetAllAsync());
         }
 
         // GET: Trainers/Details/5
@@ -33,8 +34,7 @@ namespace FootballManagerApp.Controllers
                 return NotFound();
             }
 
-            var trainer = await _context.Trainer
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var trainer = await repository.GetAsync(id);
             if (trainer == null)
             {
                 return NotFound();
@@ -58,8 +58,8 @@ namespace FootballManagerApp.Controllers
         {
             if (ModelState.IsValid)
             {
-                _context.Add(trainer);
-                await _context.SaveChangesAsync();
+                repository.Add(trainer);
+                await repository.SaveAsync();
                 return RedirectToAction(nameof(Index));
             }
             return View(trainer);
@@ -73,7 +73,7 @@ namespace FootballManagerApp.Controllers
                 return NotFound();
             }
 
-            var trainer = await _context.Trainer.FindAsync(id);
+            var trainer = await repository.GetAsync(id);
             if (trainer == null)
             {
                 return NotFound();
@@ -97,8 +97,8 @@ namespace FootballManagerApp.Controllers
             {
                 try
                 {
-                    _context.Update(trainer);
-                    await _context.SaveChangesAsync();
+                    repository.Update(trainer);
+                    await repository.SaveAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -124,8 +124,7 @@ namespace FootballManagerApp.Controllers
                 return NotFound();
             }
 
-            var trainer = await _context.Trainer
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var trainer = await repository.GetAsync(id);
             if (trainer == null)
             {
                 return NotFound();
@@ -139,15 +138,15 @@ namespace FootballManagerApp.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var trainer = await _context.Trainer.FindAsync(id);
-            _context.Trainer.Remove(trainer);
-            await _context.SaveChangesAsync();
+            var trainer = await repository.GetAsync(id);
+            repository.Delete(trainer);
+            await repository.SaveAsync();
             return RedirectToAction(nameof(Index));
         }
 
         private bool TrainerExists(int id)
         {
-            return _context.Trainer.Any(e => e.Id == id);
+            return repository.GetAll().Any(e => e.Id == id);
         }
     }
 }

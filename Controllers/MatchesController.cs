@@ -1,29 +1,29 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using FootballManagerApp.EntityFramework;
 using FootballManagerApp.Models;
+using FootballManagerApp.Repositories.Interfaces;
 
 namespace FootballManagerApp.Controllers
 {
     public class MatchesController : Controller
     {
-        private readonly FootballDbContext _context;
+        private readonly IMatchRepository repository;
+        private readonly ITeamRepository team;
 
-        public MatchesController(FootballDbContext context)
+        public MatchesController(IMatchRepository _repository, ITeamRepository _team)
         {
-            _context = context;
+            repository = _repository;
+            team = _team;
         }
 
         // GET: Matches
         public async Task<IActionResult> Index()
         {
-            var footballDbContext = _context.Match.Include(m => m.Team);
-            return View(await footballDbContext.ToListAsync());
+            var matches = repository.GetAllAsync();
+            return View(await matches);
         }
 
         // GET: Matches/Details/5
@@ -34,9 +34,7 @@ namespace FootballManagerApp.Controllers
                 return NotFound();
             }
 
-            var match = await _context.Match
-                .Include(m => m.Team)
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var match = await repository.GetAsync(id);
             if (match == null)
             {
                 return NotFound();
@@ -48,7 +46,7 @@ namespace FootballManagerApp.Controllers
         // GET: Matches/Create
         public IActionResult Create()
         {
-            ViewData["TeamId"] = new SelectList(_context.Team, "Id", "TeamType");
+            ViewData["TeamId"] = new SelectList(team.GetAll(), "Id", "TeamType");
             return View();
         }
 
@@ -61,11 +59,11 @@ namespace FootballManagerApp.Controllers
         {
             if (ModelState.IsValid)
             {
-                _context.Add(match);
-                await _context.SaveChangesAsync();
+                repository.Add(match);
+                await repository.SaveAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["TeamId"] = new SelectList(_context.Team, "Id", "TeamType", match.TeamId);
+            ViewData["TeamId"] = new SelectList(team.GetAll(), "Id", "TeamType", match.TeamId);
             return View(match);
         }
 
@@ -77,12 +75,12 @@ namespace FootballManagerApp.Controllers
                 return NotFound();
             }
 
-            var match = await _context.Match.FindAsync(id);
+            var match = await repository.FindsAsync(id);
             if (match == null)
             {
                 return NotFound();
             }
-            ViewData["TeamId"] = new SelectList(_context.Team, "Id", "TeamType", match.TeamId);
+            ViewData["TeamId"] = new SelectList(team.GetAll(), "Id", "TeamType", match.TeamId);
             return View(match);
         }
 
@@ -93,6 +91,8 @@ namespace FootballManagerApp.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Versus,MachType,DateOfMatch,TeamId")] Match match)
         {
+            var exist = await repository.GetAllAsync();
+
             if (id != match.Id)
             {
                 return NotFound();
@@ -102,8 +102,8 @@ namespace FootballManagerApp.Controllers
             {
                 try
                 {
-                    _context.Update(match);
-                    await _context.SaveChangesAsync();
+                    repository.Update(match);
+                    await repository.SaveAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -118,7 +118,7 @@ namespace FootballManagerApp.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["TeamId"] = new SelectList(_context.Team, "Id", "TeamType", match.TeamId);
+            ViewData["TeamId"] = new SelectList(team.GetAll(), "Id", "TeamType", match.TeamId);
             return View(match);
         }
 
@@ -130,9 +130,7 @@ namespace FootballManagerApp.Controllers
                 return NotFound();
             }
 
-            var match = await _context.Match
-                .Include(m => m.Team)
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var match = await repository.GetAsync(id);
             if (match == null)
             {
                 return NotFound();
@@ -146,15 +144,14 @@ namespace FootballManagerApp.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var match = await _context.Match.FindAsync(id);
-            _context.Match.Remove(match);
-            await _context.SaveChangesAsync();
+            var match = await repository.FindsAsync(id);
+            repository.Delete(match);
+            await repository.SaveAsync();
             return RedirectToAction(nameof(Index));
         }
-
         private bool MatchExists(int id)
         {
-            return _context.Match.Any(e => e.Id == id);
+            return repository.GetAll().Any(e => e.Id == id);
         }
     }
 }

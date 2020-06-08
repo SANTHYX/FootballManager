@@ -1,4 +1,6 @@
 using FootballManagerApp.EntityFramework;
+using FootballManagerApp.Repositories;
+using FootballManagerApp.Repositories.Interfaces;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -21,6 +23,13 @@ namespace FootballManagerApp
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllersWithViews();
+
+            services.AddScoped<IPlayerRepository, PlayerRepository>();
+            services.AddScoped<ITeamRepository, TeamRepository>();
+            services.AddScoped<IMatchRepository, MatchRepository>();
+            services.AddScoped<ITrainerRepository, TrainerRepository>();
+            services.AddScoped<ITrainingRepository, TrainingRepository>();
+
             services.AddDbContext<FootballDbContext>(op => op.UseSqlServer("ConnectionString"));
         }
 

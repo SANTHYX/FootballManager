@@ -12,6 +12,7 @@ namespace FootballManagerApp.Models
         public int Id { get; set; }
 
         [Required]
+        [StringLength(40)]
         public string Description { get; set; }
 
         [Required]

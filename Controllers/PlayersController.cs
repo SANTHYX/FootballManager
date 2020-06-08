@@ -7,23 +7,28 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using FootballManagerApp.EntityFramework;
 using FootballManagerApp.Models;
+using FootballManagerApp.Repositories;
+using FootballManagerApp.Repositories.Interfaces;
 
 namespace FootballManagerApp.Controllers
 {
     public class PlayersController : Controller
     {
-        private readonly FootballDbContext _context;
+        private readonly IPlayerRepository repository;
 
-        public PlayersController(FootballDbContext context)
+        private readonly ITeamRepository team;
+
+        public PlayersController(IPlayerRepository _repository, ITeamRepository _team)
         {
-            _context = context;
+            repository = _repository;
+            team = _team;
         }
 
         // GET: Players
         public async Task<IActionResult> Index()
         {
-            var footballDbContext = _context.Player.Include(p => p.Team);
-            return View(await footballDbContext.ToListAsync());
+            var players = await repository.GetAllAsync();
+            return View(players);
         }
 
         // GET: Players/Details/5
@@ -34,9 +39,7 @@ namespace FootballManagerApp.Controllers
                 return NotFound();
             }
 
-            var player = await _context.Player
-                .Include(p => p.Team)
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var player = await repository.GetAsync(id);
             if (player == null)
             {
                 return NotFound();
@@ -48,7 +51,7 @@ namespace FootballManagerApp.Controllers
         // GET: Players/Create
         public IActionResult Create()
         {
-            ViewData["TeamId"] = new SelectList(_context.Team, "Id", "TeamType");
+            ViewData["TeamId"] = new SelectList(team.GetAll(), "Id", "TeamType");
             return View();
         }
 
@@ -61,11 +64,11 @@ namespace FootballManagerApp.Controllers
         {
             if (ModelState.IsValid)
             {
-                _context.Add(player);
-                await _context.SaveChangesAsync();
+                repository.Add(player);
+                await repository.SaveAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["TeamId"] = new SelectList(_context.Team, "Id", "TeamType", player.TeamId);
+            ViewData["TeamId"] = new SelectList(team.GetAll(), "Id", "TeamType", player.TeamId);
             return View(player);
         }
 
@@ -77,12 +80,12 @@ namespace FootballManagerApp.Controllers
                 return NotFound();
             }
 
-            var player = await _context.Player.FindAsync(id);
+            var player = await repository.GetAsync(id);
             if (player == null)
             {
                 return NotFound();
             }
-            ViewData["TeamId"] = new SelectList(_context.Team, "Id", "TeamType", player.TeamId);
+            ViewData["TeamId"] = new SelectList(team.GetAll(), "Id", "TeamType", player.TeamId);
             return View(player);
         }
 
@@ -97,13 +100,15 @@ namespace FootballManagerApp.Controllers
             {
                 return NotFound();
             }
+            var existplayer = await repository.GetAllAsync();
+            var exist = existplayer.Any(x => x.Id == player.Id);
 
             if (ModelState.IsValid)
             {
                 try
                 {
-                    _context.Update(player);
-                    await _context.SaveChangesAsync();
+                    repository.Update(player);
+                    await repository.SaveAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -118,7 +123,7 @@ namespace FootballManagerApp.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["TeamId"] = new SelectList(_context.Team, "Id", "TeamType", player.TeamId);
+            ViewData["TeamId"] = new SelectList(team.GetAll(), "Id", "TeamType", player.TeamId);
             return View(player);
         }
 
@@ -130,9 +135,7 @@ namespace FootballManagerApp.Controllers
                 return NotFound();
             }
 
-            var player = await _context.Player
-                .Include(p => p.Team)
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var player = await repository.GetAsync(id);
             if (player == null)
             {
                 return NotFound();
@@ -146,15 +149,14 @@ namespace FootballManagerApp.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var player = await _context.Player.FindAsync(id);
-            _context.Player.Remove(player);
-            await _context.SaveChangesAsync();
+            var player = await repository.GetAsync((int?)id);
+            repository.Delete(player);
+            await repository.SaveAsync();
             return RedirectToAction(nameof(Index));
         }
-
         private bool PlayerExists(int id)
         {
-            return _context.Player.Any(e => e.Id == id);
+            return repository.GetAll().Any(x => x.Id == id);
         }
     }
 }

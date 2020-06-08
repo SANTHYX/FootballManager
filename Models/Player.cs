@@ -12,12 +12,15 @@ namespace FootballManagerApp.Models
         public int Id { get; set; }
 
         [Required]
+        [StringLength(20)]
         public string Name { get; set; }
 
         [Required]
+        [StringLength(30)]
         public string Surname { get; set; }
 
         [Required]
+        [Range(0, int.MaxValue, ErrorMessage = "Wartość nie może być ujemna")]
         public int Number { get; set; }
 
         [Required]

@@ -12,9 +12,11 @@ namespace FootballManagerApp.Models
         public int Id { get; set; }
 
         [Required]
+        [StringLength(20)]
         public string Name { get; set; }
 
         [Required]
+        [StringLength(20)]
         public string Surname { get; set; }
 
         public Position TrainerOf { get; set; }
